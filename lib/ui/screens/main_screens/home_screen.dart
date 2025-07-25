@@ -1,5 +1,8 @@
 import 'dart:ui';
+import 'package:beacon/ui/screens/sub_screens/hospital_screen.dart';
 import 'package:beacon/ui/utils/assets_path.dart';
+import 'package:beacon/ui/utils/page_switch.dart';
+import 'package:beacon/ui/widgets/custom_appbar.dart';
 import 'package:beacon/ui/widgets/service_button.dart';
 import 'package:beacon/ui/widgets/sos_progress_button.dart';
 import 'package:flutter/material.dart';
@@ -21,33 +24,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 0, 12, 53),
-        elevation: 0,
-        centerTitle: true,
-
-        // Hamburger menu
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white),
-          onPressed: () {
-            
-          },
-        ),
-
-        // Title
-        title: const Text(
-          "Beacon",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-          ),
-        ),
-      ),
+      appBar: CustomAppBar(title: "Home",ontap: () {
+        print("one tap pressed at appabar");
+      },),
 
       body: Stack(
         children: [
-          
           ScreenBackground(
             child: Column(
               children: [
@@ -63,7 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       alignment: WrapAlignment.center,
                       children: [
                         ServiceButton(
-                          onTap: () {},
+                          onTap: () {
+                            navigateTo(context, HospitalScreen());
+                          },
                           title: "Hospital",
                           imagePath: AssetsPath.hospitalIcon,
                         ),
@@ -103,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // SOS Button Floating Above Bottom Navigation
           Positioned(
-            bottom: 180, 
+            bottom: 180,
             left: 0,
             right: 0,
             child: Center(
@@ -132,11 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
           shape: const CircleBorder(),
           backgroundColor: const Color.fromARGB(255, 0, 12, 53),
           elevation: 6,
-          child: const Icon(
-            Icons.home,
-            size: 32, 
-            color: Colors.white,
-          ),
+          child: const Icon(Icons.home, size: 32, color: Colors.white),
           onPressed: () => setState(() => currentIndex = 1),
         ),
       ),

@@ -1,4 +1,4 @@
-import 'package:beacon/ui/screens/home_screen.dart';
+import 'package:beacon/ui/screens/main_screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
