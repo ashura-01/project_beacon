@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.white),
           onPressed: () {
-            // Handle drawer open or action
+            
           },
         ),
 
@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       body: Stack(
         children: [
-          // Background with content
+          
           ScreenBackground(
             child: Column(
               children: [
@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // SOS Button Floating Above Bottom Navigation
           Positioned(
-            bottom: 180, // adjust to float above bottom nav bar
+            bottom: 180, 
             left: 0,
             right: 0,
             child: Center(
@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
           elevation: 6,
           child: const Icon(
             Icons.home,
-            size: 32, // ⬅️ Bigger icon for bigger button
+            size: 32, 
             color: Colors.white,
           ),
           onPressed: () => setState(() => currentIndex = 1),
