@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:beacon/ui/screens/sub_screens/hospital_screen.dart';
 import 'package:beacon/ui/utils/assets_path.dart';
 import 'package:beacon/ui/utils/page_switch.dart';
-import 'package:beacon/ui/widgets/custom_appbar.dart';
 import 'package:beacon/ui/widgets/service_button.dart';
 import 'package:beacon/ui/widgets/sos_progress_button.dart';
 import 'package:flutter/material.dart';
@@ -24,9 +23,73 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar: CustomAppBar(title: "Home",ontap: () {
-        print("one tap pressed at appabar");
-      },),
+      appBar:  AppBar(
+        backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+        elevation: 0,
+        centerTitle: true,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () {
+              Scaffold.of(context).openDrawer(); // opens the drawer
+            },
+          ),
+        ),
+        title: const Text(
+          "Beacon",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
+      ),
+
+      // 🧩 Drawer here
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Color.fromARGB(255, 0, 12, 53),
+              ),
+              child: Text(
+                'Menu',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('My Account'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.info),
+              title: const Text('About Us'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.volunteer_activism),
+              title: const Text('Join Volunteer'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
 
       body: Stack(
         children: [
