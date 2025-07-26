@@ -26,8 +26,8 @@ class ScreenBackground extends StatelessWidget {
               AssetsPath.logo,
               width: 550,
               fit: BoxFit.contain,
-              color: Colors.white24, // fade into background
-              colorBlendMode: BlendMode.modulate,   // smooth blend
+              color: Colors.white24, 
+              colorBlendMode: BlendMode.modulate, 
             ),
           ),
 

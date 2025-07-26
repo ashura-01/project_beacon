@@ -15,11 +15,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: Colors.white),
         onPressed: () {
-          Navigator.pop(context); // Optional: go back to the previous screen
+          Navigator.pop(context); 
         },
       ),
 
-      // Title
+      
       title: Text(
         title,
         style: TextStyle(
@@ -31,7 +31,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  // This is needed to tell Scaffold how tall the AppBar is
+  
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

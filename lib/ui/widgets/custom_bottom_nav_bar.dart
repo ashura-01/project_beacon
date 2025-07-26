@@ -13,7 +13,7 @@ class CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      color: const Color(0xFF0A0F2C), // matches your dark theme
+      color: const Color(0xFF0A0F2C), 
       shape: const CircularNotchedRectangle(),
       elevation: 12,
       notchMargin: 10,
@@ -22,7 +22,6 @@ class CustomBottomNavBar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            // Left: Location icon
             IconButton(
               icon: Icon(
                 Icons.location_on,
@@ -31,10 +30,8 @@ class CustomBottomNavBar extends StatelessWidget {
               onPressed: () => onTap(0),
             ),
 
-            // Spacer for center FAB (home icon)
             const SizedBox(width: 40),
 
-            // Right: Messaging icon
             IconButton(
               icon: Icon(
                 Icons.message,
