@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:beacon/ui/screens/main_screens/blu_messenger.dart';
 import 'package:beacon/ui/screens/sub_screens/hospital_screen.dart';
 import 'package:beacon/ui/utils/assets_path.dart';
 import 'package:beacon/ui/utils/page_switch.dart';
@@ -23,17 +24,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar:  AppBar(
+      appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
         elevation: 0,
         centerTitle: true,
         leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: () {
-              Scaffold.of(context).openDrawer(); // opens the drawer
-            },
-          ),
+          builder:
+              (context) => IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer(); // opens the drawer
+                },
+              ),
         ),
         title: const Text(
           "Beacon",
@@ -51,9 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 0, 12, 53),
-              ),
+              decoration: BoxDecoration(color: Color.fromARGB(255, 0, 12, 53)),
               child: Text(
                 'Menu',
                 style: TextStyle(color: Colors.white, fontSize: 24),
@@ -103,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Wrap(
-                      spacing: 40,
+                      spacing: 8,
                       runSpacing: 20,
                       alignment: WrapAlignment.center,
                       children: [
@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // SOS Button Floating Above Bottom Navigation
           Positioned(
-            bottom: 180,
+            bottom: 160,
             left: 0,
             right: 0,
             child: Center(
@@ -169,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: currentIndex,
-        onTap: (index) => setState(() => currentIndex = index),
+        onTap: onNavTap, // pass this function here
       ),
 
       floatingActionButton: SizedBox(
@@ -186,5 +186,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
+  }
+
+  void onNavTap(int index) {
+    setState(() {
+      currentIndex = index;
+    });
+
+    if (index == 0) {
+      print("Location tapped");
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const BluMessenger()),
+      ).then((_) {
+        // Refresh home screen when coming back
+        setState(() {});
+      });
+    }
   }
 }

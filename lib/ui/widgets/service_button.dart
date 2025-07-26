@@ -18,8 +18,8 @@ class ServiceButton extends StatelessWidget {
       onTap: onTap,
 
       child: Container(
-        width: 200,
-        height: 90,
+        width: 168,
+        height: 70,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: const  Color.fromARGB(255, 0, 12, 53), // Dark blue background
@@ -38,7 +38,7 @@ class ServiceButton extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(width: 20),
+            const SizedBox(width: 5),
            
             Text(
               title,
