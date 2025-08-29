@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:beacon/ui/screens/main_screens/blu_messenger.dart';
 import 'package:beacon/ui/screens/sub_screens/hospital_screen.dart';
 import 'package:beacon/ui/utils/assets_path.dart';
@@ -33,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
               (context) => IconButton(
                 icon: const Icon(Icons.menu, color: Colors.white),
                 onPressed: () {
-                  Scaffold.of(context).openDrawer(); // opens the drawer
+                  Scaffold.of(context).openDrawer();
                 },
               ),
         ),
@@ -47,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      // 🧩 Drawer here
+
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -98,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const SizedBox(
                   height: kToolbarHeight + 80,
-                ), // space below app bar
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -139,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           title: "Police",
                           imagePath: AssetsPath.policeIcon,
                         ),
-                        const SizedBox(height: 160), // space for SOS button
+                        const SizedBox(height: 160),
                       ],
                     ),
                   ),
@@ -148,7 +147,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // SOS Button Floating Above Bottom Navigation
           Positioned(
             bottom: 160,
             left: 0,
@@ -169,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: currentIndex,
-        onTap: onNavTap, // pass this function here
+        onTap: onNavTap,
       ),
 
       floatingActionButton: SizedBox(

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 class SosProgressButton extends StatefulWidget {
-  final double size; // Diameter of whole widget (button + progress ring)
-  final double strokeWidth; // Thickness of progress ring
-  final Color color; // Color for button background AND progress ring
-  final VoidCallback onComplete; // Callback when progress completes
+  final double size;
+  final double strokeWidth; 
+  final Color color;
+  final VoidCallback onComplete; 
 
   const SosProgressButton({
     super.key,

@@ -27,7 +27,6 @@ class _BluMessengerState extends State<BluMessenger> {
   }
 
   Future<void> _initNearby() async {
-    // Request permissions
     await [
       Permission.bluetooth,
       Permission.location,
@@ -41,7 +40,6 @@ class _BluMessengerState extends State<BluMessenger> {
         ? 'Device_${Platform.localHostname}'
         : 'Device_${DateTime.now().millisecondsSinceEpoch}';
 
-    // Start advertising
     try {
       await Nearby().startAdvertising(
         deviceName,
@@ -67,7 +65,6 @@ class _BluMessengerState extends State<BluMessenger> {
       print('Error starting advertising: $e');
     }
 
-    // Start discovery
     try {
       await Nearby().startDiscovery(
         deviceName,
