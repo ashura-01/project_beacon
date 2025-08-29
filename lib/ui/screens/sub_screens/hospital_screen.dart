@@ -1,5 +1,12 @@
-import 'package:beacon/ui/widgets/custom_appbar.dart';
+import 'dart:convert';
+import 'package:beacon/ui/utils/map_api_key.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
+import 'package:flutter/services.dart'; // For clipboard
+
+import '../main_screens/map_screen.dart';
 
 class HospitalScreen extends StatefulWidget {
   const HospitalScreen({super.key});
@@ -9,113 +16,183 @@ class HospitalScreen extends StatefulWidget {
 }
 
 class _HospitalScreenState extends State<HospitalScreen> {
-  final List<String> _nameList = [
-    "Apollo Hospital",
-    "Square Hospital",
-    "United Hospital",
-    "Evercare Hospital",
-    "Labaid Hospital",
-    "Green Life Hospital",
-    "Ibn Sina Hospital",
-    "Dhaka Medical",
-    "Popular Hospital",
-    "CMH Dhaka",
-  ];
+  final String apiKey = MapApiKey.api_1;
+  List<Map<String, dynamic>> _hospitals = [];
+  bool _loading = true;
+  Position? _currentPosition;
 
-  final List<String> _numberList = [
-    "01711-123456",
-    "01722-234567",
-    "01733-345678",
-    "01744-456789",
-    "01755-567890",
-    "01766-678901",
-    "01777-789012",
-    "01788-890123",
-    "01799-901234",
-    "01800-012345",
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchHospitals();
+  }
 
-  final List<String> _locationList = [
-    "Gulshan, Dhaka",
-    "Panthapath, Dhaka",
-    "Banani, Dhaka",
-    "Bashundhara, Dhaka",
-    "Dhanmondi, Dhaka",
-    "Green Road, Dhaka",
-    "Dhanmondi 12, Dhaka",
-    "Azimpur, Dhaka",
-    "Shyamoli, Dhaka",
-    "Cantonment, Dhaka",
-  ];
+  Future<void> _fetchHospitals() async {
+    try {
+      // Step 1: Get current location
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      setState(() => _currentPosition = position);
+
+      // Step 2: Fetch nearby hospitals
+      final url =
+          "https://api.geoapify.com/v2/places?categories=healthcare.hospital"
+          "&filter=circle:${position.longitude},${position.latitude},5000"
+          "&bias=proximity:${position.longitude},${position.latitude}"
+          "&limit=20&apiKey=$apiKey";
+
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final features = data["features"] as List;
+
+        List<Map<String, dynamic>> hospitals = [];
+
+        for (var f in features) {
+          final props = f["properties"];
+          final geometry = f["geometry"]["coordinates"];
+          double distance =
+              props["distance"] != null ? props["distance"].toDouble() : 0.0;
+
+          // --- Get phone reliably ---
+          String phone = "N/A";
+
+          if (props["contact"] != null && props["contact"]["phone"] != null) {
+            phone = props["contact"]["phone"].toString();
+          } else if (props["datasource"] != null &&
+              props["datasource"]["raw"] != null) {
+            final raw = props["datasource"]["raw"];
+            if (raw["phone"] != null && raw["phone"].toString().isNotEmpty) {
+              phone = raw["phone"].toString();
+            } else if (raw["contactPhone"] != null &&
+                raw["contactPhone"].toString().isNotEmpty) {
+              phone = raw["contactPhone"].toString();
+            } else if (raw["mobile"] != null &&
+                raw["mobile"].toString().isNotEmpty) {
+              phone = raw["mobile"].toString();
+            }
+          }
+
+          hospitals.add({
+            "name": props["name"] ?? "Unnamed Hospital",
+            "address": props["formatted"] ?? "No address",
+            "phone": phone,
+            "distance": distance,
+            "lat": geometry[1],
+            "lon": geometry[0],
+          });
+        }
+
+        setState(() {
+          _hospitals = hospitals;
+          _loading = false;
+        });
+      } else {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error fetching hospitals: ${response.statusCode}"),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Error fetching hospitals: $e")));
+    }
+  }
+
+  String _formatDistance(double meters) {
+    if (meters >= 1000) {
+      return "${(meters / 1000).toStringAsFixed(2)} km";
+    } else {
+      return "${meters.toStringAsFixed(0)} m";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: "Nearby Hospitals"),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: _nameList.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onLongPress: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Long pressed: ${_nameList[index]}"),
+      appBar: AppBar(
+        title: const Text("Nearby Hospitals"),
+        backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+        foregroundColor: Colors.white,
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _hospitals.isEmpty
+              ? const Center(child: Text("No hospitals found nearby."))
+              : ListView.builder(
+                  itemCount: _hospitals.length,
+                  itemBuilder: (context, index) {
+                    final hospital = _hospitals[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.local_hospital,
+                          color: Colors.red,
+                        ),
+                        title: Text(
+                          hospital["name"],
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(hospital["address"]),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Expanded(child: Text(hospital["phone"])),
+                                IconButton(
+                                  icon: const Icon(Icons.copy, size: 18),
+                                  onPressed: () {
+                                    Clipboard.setData(
+                                      ClipboardData(text: hospital["phone"]),
+                                    );
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text("Phone number copied!"),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        trailing: Text(
+                          _formatDistance(hospital["distance"]),
+                          style: const TextStyle(color: Colors.blueGrey),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MapScreen(
+                                destination: LatLng(
+                                  hospital["lat"],
+                                  hospital["lon"],
+                                ),
+                                destinationName: hospital["name"],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    child: ListTile(
-                      title: Text(
-                        _nameList[index],
-                        style: const TextStyle(
-                          color: Color.fromARGB(255, 0, 12, 53),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(_numberList[index]),
-                          const SizedBox(height: 4),
-                          Text("Location: ${_locationList[index]}"),
-                        ],
-                      ),
-                      leading: const Icon(
-                        Icons.local_hospital_rounded,
-                        size: 40,
-                        color: Colors.green,
-                      ),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(
-                            Icons.location_on,
-                            color: Color.fromARGB(255, 0, 12, 53),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            "5.6 km", // can be another dynamic list later
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      onTap: () {
-                        print(_nameList[index]);
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+                ),
     );
   }
 }
