@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // for orientation lock
 import 'package:nearby_connections/nearby_connections.dart';
@@ -226,7 +225,7 @@ class _BluMessengerState extends State<BluMessenger> {
               controller: _scrollController,
               itemCount: messages.length,
               itemBuilder: (context, i) {
-                final isMe = !messages[i].startsWith("🟢"); // If no green icon, it's sender
+                final isMe = !messages[i].startsWith("🟢"); 
                 return Align(
                   alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
