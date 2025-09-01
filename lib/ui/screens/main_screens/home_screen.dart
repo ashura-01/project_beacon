@@ -1,11 +1,11 @@
 import 'package:beacon/ui/screens/main_screens/blu_messenger.dart';
 import 'package:beacon/ui/screens/main_screens/map_screen.dart';
 import 'package:beacon/ui/screens/sub_screens/ambulance_screen.dart';
-import 'package:beacon/ui/screens/sub_screens/blood_screen.dart';
 import 'package:beacon/ui/screens/sub_screens/fire_screen.dart';
 import 'package:beacon/ui/screens/sub_screens/hospital_screen.dart';
 import 'package:beacon/ui/screens/sub_screens/pharmacy_screen.dart';
 import 'package:beacon/ui/screens/sub_screens/police_screen.dart';
+import 'package:beacon/ui/screens/sub_screens/volunteer_screen.dart';
 import 'package:beacon/ui/utils/assets_path.dart';
 import 'package:beacon/ui/utils/page_switch.dart';
 import 'package:beacon/ui/widgets/custom_drawer.dart';
@@ -89,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         ServiceButton(
                           onTap: () {
-                            navigateTo(context, BloodBankScreen());
+                            navigateTo(context, VolunteerScreen());
                           },
                           title: "Blood Bank",
                           imagePath: AssetsPath.bloodIcon,

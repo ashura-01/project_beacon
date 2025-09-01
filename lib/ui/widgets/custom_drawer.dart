@@ -3,6 +3,7 @@ import 'package:beacon/ui/screens/main_screens/login_screen.dart';
 import 'package:beacon/ui/screens/others/about_us.dart';
 import 'package:beacon/ui/screens/others/my_account.dart';
 import 'package:beacon/ui/screens/others/settings.dart';
+import 'package:beacon/ui/screens/sub_screens/blood_screen.dart';
 import 'package:beacon/ui/utils/page_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -49,6 +50,14 @@ class CustomDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     navigateTo(context, SettingsScreen());
+                  },
+                ),
+                 ListTile(
+                  leading: const Icon(Icons.volunteer_activism),
+                  title: const Text('Join Volunteer'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    navigateTo(context, BloodBankScreen());
                   },
                 ),
                 ListTile(
