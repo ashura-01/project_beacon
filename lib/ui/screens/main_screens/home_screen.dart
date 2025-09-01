@@ -14,7 +14,6 @@ import 'package:beacon/ui/widgets/sos_progress_button.dart';
 import 'package:flutter/material.dart';
 import 'package:beacon/ui/widgets/custom_bottom_nav_bar.dart';
 import 'package:beacon/ui/widgets/screen_background.dart';
-import '';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
