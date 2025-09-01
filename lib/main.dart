@@ -10,6 +10,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  Get.put(AuthController()); // <-- Important
+  Get.put(AuthController()); 
   runApp(const MyApp());
 }

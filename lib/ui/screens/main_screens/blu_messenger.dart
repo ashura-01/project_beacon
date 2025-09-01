@@ -1,140 +1,189 @@
-import 'dart:io';
 import 'dart:typed_data';
-
-import 'package:beacon/ui/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // for orientation lock
 import 'package:nearby_connections/nearby_connections.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+
+
 class BluMessenger extends StatefulWidget {
   const BluMessenger({super.key});
+
   @override
   State<BluMessenger> createState() => _BluMessengerState();
 }
 
 class _BluMessengerState extends State<BluMessenger> {
   final Strategy strategy = Strategy.P2P_CLUSTER;
-  final List<String> messages = [];
   final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
+  final List<String> messages = [];
+  final Map<String, String> discoveredDevices = {};
   String? connectedId;
-  String? connectedDeviceName;
+  String? connectedName;
+  bool isDiscovering = false;
 
   @override
   void initState() {
     super.initState();
-    _initNearby();
+    _initializeNearby();
   }
 
-  Future<void> _initNearby() async {
+  Future<void> _initializeNearby() async {
     await [
       Permission.bluetooth,
-      Permission.location,
       Permission.bluetoothAdvertise,
       Permission.bluetoothConnect,
-      Permission.bluetoothScan,
-      Permission.nearbyWifiDevices,
+      Permission.location
     ].request();
 
-    final deviceName = Platform.localHostname.isNotEmpty
-        ? 'Device_${Platform.localHostname}'
-        : 'Device_${DateTime.now().millisecondsSinceEpoch}';
+    _startAdvertising();
+    _startDiscovery();
+  }
 
+  Future<void> _startAdvertising() async {
     try {
       await Nearby().startAdvertising(
-        deviceName,
+        'User',
         strategy,
         onConnectionInitiated: _onConnectionInit,
         onConnectionResult: (id, status) {
-          print("Advertiser Connection Result: $status");
-          if (status == Status.CONNECTED && mounted) {
+          if (status == Status.CONNECTED) {
             setState(() => connectedId = id);
           }
         },
         onDisconnected: (id) {
-          print("Disconnected from: $id");
-          if (mounted) {
-            setState(() {
-              connectedId = null;
-              connectedDeviceName = null;
-            });
-          }
+          setState(() {
+            connectedId = null;
+            connectedName = null;
+          });
         },
       );
     } catch (e) {
-      print('Error starting advertising: $e');
-    }
-
-    try {
-      await Nearby().startDiscovery(
-        deviceName,
-        strategy,
-        onEndpointFound: (id, name, serviceId) {
-          print("Found endpoint: $name");
-          Nearby().requestConnection(
-            deviceName,
-            id,
-            onConnectionInitiated: _onConnectionInit,
-            onConnectionResult: (id, status) {
-              print("Discovery Connection Result: $status");
-              if (status == Status.CONNECTED && mounted) {
-                setState(() => connectedId = id);
-              }
-            },
-            onDisconnected: (id) {
-              print("Disconnected from: $id");
-              if (mounted) {
-                setState(() {
-                  connectedId = null;
-                  connectedDeviceName = null;
-                });
-              }
-            },
-          );
-        },
-        onEndpointLost: (id) => print("Lost endpoint: $id"),
-      );
-    } catch (e) {
-      print('Error starting discovery: $e');
+      debugPrint("Error starting advertising: $e");
     }
   }
 
-  void _onConnectionInit(String id, ConnectionInfo info) {
-    print("Connecting to ${info.endpointName}");
+  Future<void> _startDiscovery() async {
+    if (isDiscovering) return;
+    setState(() => isDiscovering = true);
 
-    if (mounted) {
-      setState(() {
-        connectedDeviceName = info.endpointName;
-      });
+    discoveredDevices.clear();
+    try {
+      await Nearby().startDiscovery(
+        'User',
+        strategy,
+        onEndpointFound: (id, name, _) {
+          setState(() {
+            discoveredDevices[id] = name;
+          });
+        },
+        onEndpointLost: (id) {
+          setState(() {
+            discoveredDevices.remove(id);
+          });
+        },
+      );
+    } catch (e) {
+      debugPrint("Discovery failed: $e");
     }
+  }
 
+  void _rescanDevices() async {
+    setState(() {
+      discoveredDevices.clear();
+      isDiscovering = false;
+    });
+    await Nearby().stopDiscovery();
+    _startDiscovery();
+  }
+
+  void _onConnectionInit(String id, ConnectionInfo info) {
     Nearby().acceptConnection(
       id,
       onPayLoadRecieved: (endid, payload) {
         if (payload.type == PayloadType.BYTES) {
           String msg = String.fromCharCodes(payload.bytes!);
-          if (mounted) {
-            setState(() => messages.add("🟢 ${connectedDeviceName ?? 'Friend'}: $msg"));
-          }
+          setState(() => messages.add("🟢 ${info.endpointName}: $msg"));
+          WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
         }
       },
       onPayloadTransferUpdate: (endid, update) {},
     );
+    setState(() {
+      connectedId = id;
+      connectedName = info.endpointName;
+    });
   }
 
-  void _sendMessage(String msg) async {
-    if (connectedId != null && msg.isNotEmpty) {
-      try {
-        await Nearby().sendBytesPayload(
-          connectedId!,
-          Uint8List.fromList(msg.codeUnits),
-        );
-        if (mounted) {
-          setState(() => messages.add("🔵 Me: $msg"));
+  void _connectToDevice(String id) {
+    Nearby().requestConnection(
+      'User',
+      id,
+      onConnectionInitiated: _onConnectionInit,
+      onConnectionResult: (id, status) {
+        if (status == Status.CONNECTED) {
+          setState(() => connectedId = id);
         }
-      } catch (e) {
-        print('Send message error: $e');
-      }
+      },
+      onDisconnected: (id) {
+        setState(() {
+          connectedId = null;
+          connectedName = null;
+        });
+      },
+    );
+  }
+
+  void _sendMessage() {
+    final msg = _controller.text.trim();
+    if (msg.isNotEmpty && connectedId != null) {
+      final bytes = Uint8List.fromList(msg.codeUnits);
+      Nearby().sendBytesPayload(connectedId!, bytes);
+      setState(() {
+        messages.add(msg);  // Sender's message without icon or "Me"
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+      _controller.clear();
+    }
+  }
+
+  void _showDeviceList() {
+    if (discoveredDevices.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No nearby devices found")),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: discoveredDevices.entries
+            .map(
+              (entry) => ListTile(
+                title: Text(entry.value),
+                subtitle: Text(entry.key),
+                onTap: () {
+                  Navigator.pop(context);
+                  _connectToDevice(entry.key);
+                },
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -143,303 +192,105 @@ class _BluMessengerState extends State<BluMessenger> {
     _controller.dispose();
     Nearby().stopAdvertising();
     Nearby().stopDiscovery();
+    Nearby().stopAllEndpoints();
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: const CustomAppBar(title: "Blu Message"),
-        body: Column(
-          children: [
-            if (connectedDeviceName != null)
-              Container(
-                width: double.infinity,
-                color: Colors.black12,
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  "🔗 Connected to: $connectedDeviceName",
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
-                ),
-              ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: messages.length,
-                padding: const EdgeInsets.all(10),
-                itemBuilder: (_, i) => Container(
-                  margin: const EdgeInsets.symmetric(vertical: 4),
-                  alignment: messages[i].startsWith("🔵")
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 213, 221, 255),
+      appBar: AppBar(
+        foregroundColor: const Color.fromARGB(255, 160, 195, 255),
+        backgroundColor: const Color.fromARGB(255, 24, 27, 43),
+        title: Text(
+          connectedName != null ? "Chat with $connectedName" : "Blue",
+          style: const TextStyle(fontSize: 16),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.devices),
+            onPressed: _showDeviceList,
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _rescanDevices,
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: messages.length,
+              itemBuilder: (context, i) {
+                final isMe = !messages[i].startsWith("🟢"); // If no green icon, it's sender
+                return Align(
+                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
-                    padding: const EdgeInsets.all(10),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: messages[i].startsWith("🔵")
-                          ? Colors.blue[100]
-                          : Colors.green[100],
-                      borderRadius: BorderRadius.circular(8),
+                      color: isMe
+                          ? const Color.fromARGB(255, 30, 37, 53)
+                          : const Color.fromARGB(255, 68, 77, 107),
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    child: Text(messages[i].replaceFirst(RegExp(r'^🔵 |^🟢 '), '')),
+                    child: Text(
+                      // Remove icon from sender message display
+                      isMe ? messages[i] : messages[i].substring(2),
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(children: [
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            color: const Color.fromARGB(255, 24, 27, 43),
+            child: Row(
+              children: [
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: const InputDecoration(
-                      hintText: "Enter message",
-                      border: OutlineInputBorder(),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Type a message...",
+                      hintStyle: const TextStyle(color: Colors.white60),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 160, 195, 255)),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 160, 195, 255)),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: () {
-                    _sendMessage(_controller.text.trim());
-                    _controller.clear();
-                  },
+                  icon: const Icon(Icons.send,
+                      color: Color.fromARGB(255, 160, 195, 255)),
+                  onPressed: _sendMessage,
                 ),
-              ]),
+              ],
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 
 
 
-
-
-// import 'dart:io';
-// import 'dart:typed_data';
-
-// import 'package:flutter/material.dart';
-// import 'package:nearby_connections/nearby_connections.dart';
-// import 'package:permission_handler/permission_handler.dart';
-// import 'package:beacon/ui/widgets/custom_appbar.dart'; // Adjust path if needed
-
-// class BluMessenger extends StatefulWidget {
-//   const BluMessenger({super.key});
-
-//   @override
-//   State<BluMessenger> createState() => _BluMessengerState();
-// }
-
-// class _BluMessengerState extends State<BluMessenger> {
-//   final Strategy strategy = Strategy.P2P_CLUSTER;
-//   final List<String> messages = [];
-//   final TextEditingController _controller = TextEditingController();
-
-//   String? connectedId;
-//   String? connectedDeviceName;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _startScan();
-//   }
-
-//   /// Restarts Nearby Connections (clears previous connections)
-//   Future<void> _startScan() async {
-//     await Nearby().stopAllEndpoints();
-//     await Nearby().stopAdvertising();
-//     await Nearby().stopDiscovery();
-
-//     await _requestPermissions();
-//     await _initNearby();
-//   }
-
-//   /// Requests necessary permissions
-//   Future<void> _requestPermissions() async {
-//     await [
-//       Permission.bluetooth,
-//       Permission.location,
-//       Permission.bluetoothAdvertise,
-//       Permission.bluetoothConnect,
-//       Permission.bluetoothScan,
-//       Permission.nearbyWifiDevices, // For Android 12+
-//     ].request();
-//   }
-
-//   /// Initializes Nearby Connections
-//   Future<void> _initNearby() async {
-//     final deviceName =
-//         Platform.localHostname.isNotEmpty
-//             ? 'Device_${Platform.localHostname}'
-//             : 'Device_${DateTime.now().millisecondsSinceEpoch}';
-
-//     try {
-//       await Nearby().startAdvertising(
-//         deviceName,
-//         strategy,
-//         onConnectionInitiated: _onConnectionInit,
-//         onConnectionResult: (id, status) {
-//           print("Advertiser Connection Result: $status");
-//           if (status == Status.CONNECTED) {
-//             setState(() => connectedId = id);
-//           }
-//         },
-//         onDisconnected: (id) {
-//           print("Disconnected from: $id");
-//           setState(() {
-//             connectedId = null;
-//             connectedDeviceName = null;
-//           });
-//         },
-//       );
-//     } catch (e) {
-//       print('Error starting advertising: $e');
-//     }
-
-//     try {
-//       await Nearby().startDiscovery(
-//         deviceName,
-//         strategy,
-//         onEndpointFound: (id, name, serviceId) {
-//           print("Found endpoint: $name");
-//           Nearby().requestConnection(
-//             deviceName,
-//             id,
-//             onConnectionInitiated: _onConnectionInit,
-//             onConnectionResult: (id, status) {
-//               print("Discovery Connection Result: $status");
-//               if (status == Status.CONNECTED) {
-//                 setState(() => connectedId = id);
-//               }
-//             },
-//             onDisconnected: (id) {
-//               print("Disconnected from: $id");
-//               setState(() {
-//                 connectedId = null;
-//                 connectedDeviceName = null;
-//               });
-//             },
-//           );
-//         },
-//         onEndpointLost: (id) => print("Lost endpoint: $id"),
-//       );
-//     } catch (e) {
-//       print('Error starting discovery: $e');
-//     }
-//   }
-
-//   /// Handles new connections
-//   void _onConnectionInit(String id, ConnectionInfo info) {
-//     print("Connecting to ${info.endpointName}");
-//     setState(() => connectedDeviceName = info.endpointName);
-
-//     Nearby().acceptConnection(
-//       id,
-//       onPayLoadRecieved: (endid, payload) {
-//         if (payload.type == PayloadType.BYTES) {
-//           String msg = String.fromCharCodes(payload.bytes!);
-//           setState(
-//             () => messages.add("🟢 ${connectedDeviceName ?? 'Friend'}: $msg"),
-//           );
-//         }
-//       },
-//       onPayloadTransferUpdate: (endid, update) {},
-//     );
-//   }
-
-//   /// Sends a message over the connection
-//   void _sendMessage(String msg) async {
-//     if (connectedId != null && msg.isNotEmpty) {
-//       try {
-//         await Nearby().sendBytesPayload(
-//           connectedId!,
-//           Uint8List.fromList(msg.codeUnits),
-//         );
-//         setState(() => messages.add("🔵 Me: $msg"));
-//       } catch (e) {
-//         print('Send message error: $e');
-//       }
-//     }
-//   }
-
-//   /// Clean up
-//   @override
-//   void dispose() {
-//     _controller.dispose();
-//     Nearby().stopAllEndpoints();
-//     Nearby().stopAdvertising();
-//     Nearby().stopDiscovery();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) => Scaffold(
-//     appBar: CustomAppBar(title: "Blu Message"),
-//     body: Column(
-//       children: [
-//         if (connectedDeviceName != null)
-//           Container(
-//             width: double.infinity,
-//             color: Colors.black12,
-//             padding: const EdgeInsets.all(12),
-//             child: Text(
-//               "🔗 Connected to: $connectedDeviceName",
-//               style: const TextStyle(
-//                 fontWeight: FontWeight.bold,
-//                 color: Colors.green,
-//               ),
-//             ),
-//           ),
-//         Expanded(
-//           child: ListView.builder(
-//             itemCount: messages.length,
-//             padding: const EdgeInsets.all(10),
-//             itemBuilder:
-//                 (_, i) => Container(
-//                   margin: const EdgeInsets.symmetric(vertical: 4),
-//                   alignment:
-//                       messages[i].startsWith("🔵")
-//                           ? Alignment.centerRight
-//                           : Alignment.centerLeft,
-//                   child: Container(
-//                     padding: const EdgeInsets.all(10),
-//                     decoration: BoxDecoration(
-//                       color:
-//                           messages[i].startsWith("🔵")
-//                               ? Colors.blue[100]
-//                               : Colors.green[100],
-//                       borderRadius: BorderRadius.circular(8),
-//                     ),
-//                     child: Text(
-//                       messages[i].replaceFirst(RegExp(r'^🔵 |^🟢 '), ''),
-//                     ),
-//                   ),
-//                 ),
-//           ),
-//         ),
-//         Padding(
-//           padding: const EdgeInsets.all(8.0),
-//           child: Row(
-//             children: [
-//               Expanded(
-//                 child: TextField(
-//                   controller: _controller,
-//                   decoration: const InputDecoration(
-//                     hintText: "Enter message",
-//                     border: OutlineInputBorder(),
-//                   ),
-//                 ),
-//               ),
-//               IconButton(
-//                 icon: const Icon(Icons.send),
-//                 onPressed: () {
-//                   _sendMessage(_controller.text.trim());
-//                   _controller.clear();
-//                 },
-//               ),
-//             ],
-//           ),
-//         ),
-//       ],
-//     ),
-//   );
-// }

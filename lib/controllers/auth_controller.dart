@@ -16,14 +16,11 @@ class AuthController extends GetxController {
     super.onReady();
     firebaseUser.bindStream(_auth.authStateChanges());
 
-    // Optionally, handle navigation based on login state
     ever(firebaseUser, (User? user) {
       if (user == null) {
-        // If not logged in, go to login screen
-        // Get.offAll(() => LoginScreen());
+        // Not logged in
       } else {
-        // If logged in, go to home screen
-        // Get.offAll(() => HomeScreen());
+        // Logged in
       }
     });
   }
@@ -33,7 +30,7 @@ class AuthController extends GetxController {
       {Map<String, dynamic>? additionalData}) async {
     try {
       UserCredential userCredential =
-      await _auth.createUserWithEmailAndPassword(
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -49,7 +46,7 @@ class AuthController extends GetxController {
 
       await _dbRef.child("users").child(uid).set(userData);
 
-      Get.snackbar("✅ Success", "Account created successfully");
+      Get.snackbar("Success", "Account created successfully");
     } on FirebaseAuthException catch (e) {
       Get.snackbar("Auth Error", e.message ?? "Something went wrong");
     } catch (e) {
@@ -73,7 +70,7 @@ class AuthController extends GetxController {
   Future<void> logout() async {
     try {
       await _auth.signOut();
-      Get.snackbar("✅ Success", "Logged out successfully");
+      Get.snackbar("Success", "Logged out successfully");
     } catch (e) {
       Get.snackbar("Error", e.toString());
     }
@@ -95,5 +92,14 @@ class AuthController extends GetxController {
       return null;
     }
   }
-}
 
+  // UPDATE NAME (move this inside the class)
+  Future<void> updateName(String uid, String newName) async {
+    try {
+      await _dbRef.child("users").child(uid).update({"name": newName});
+      Get.snackbar("Success", "Name updated successfully");
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    }
+  }
+}

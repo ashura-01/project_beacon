@@ -19,40 +19,71 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white70,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const SizedBox(height: 30),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset(AssetsPath.logo, height: 200, fit: BoxFit.cover),
-              ),
-              const SizedBox(height: 20),
-              buildTextField(emailController, "EMAIL"),
-              const SizedBox(height: 20),
-              buildTextField(passwordController, "PASSWORD", obscureText: true),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () async {
-                  await authController.login(
-                    emailController.text.trim(),
-                    passwordController.text.trim(),
-                  );
-                  navigateAndClearStack(context, const HomeScreen());
-                },
-                child: const Text("LOG IN"),
-              ),
-              const SizedBox(height: 20),
-              GestureDetector(
-                onTap: () => navigateTo(context, const SignUpScreen()),
-                child: const Text("Don't have an account? SIGN UP"),
-              ),
-            ],
+        child: SingleChildScrollView(
+          // prevents overflow when keyboard appears
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 30),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset(
+                    AssetsPath.logo,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                buildTextField(emailController, "EMAIL"),
+                const SizedBox(height: 20),
+                buildTextField(passwordController, "PASSWORD", obscureText: true),
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: 200,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                    ),
+                    onPressed: () async {
+                      await authController.login(
+                        emailController.text.trim(),
+                        passwordController.text.trim(),
+                      );
+                      navigateAndClearStack(context, const HomeScreen());
+                    },
+                    child: const Text("LOG IN"),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: GestureDetector(
+                    onTap: () => navigateTo(context, const SignUpScreen()),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Don't have an account? "),
+                        Text(
+                          "SIGN UP",
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 0, 12, 53),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-

@@ -85,6 +85,8 @@ class _PoliceStationScreenState extends State<PoliceStationScreen> {
       appBar: AppBar(
         title: const Text("Nearby Police Stations"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+        foregroundColor: Colors.white,
+
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

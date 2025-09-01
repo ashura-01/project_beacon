@@ -93,6 +93,7 @@ class _AmbulanceScreenState extends State<AmbulanceScreen> {
       appBar: AppBar(
         title: const Text("Nearby Ambulance Stations"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+        foregroundColor: Colors.white,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

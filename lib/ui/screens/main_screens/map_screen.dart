@@ -170,12 +170,14 @@ class _MapScreenState extends State<MapScreen>
             : TextField(
           controller: _searchController,
           decoration: const InputDecoration(
+            
             hintText: "Search location...",
             border: InputBorder.none,
           ),
           onChanged: _getSuggestionsDebounced,
         ),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+        foregroundColor: Colors.white,
       ),
       body: Stack(
         children: [

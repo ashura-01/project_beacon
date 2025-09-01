@@ -1,6 +1,7 @@
 import 'package:beacon/ui/screens/main_screens/blu_messenger.dart';
 import 'package:beacon/ui/screens/main_screens/map_screen.dart';
 import 'package:beacon/ui/screens/sub_screens/ambulance_screen.dart';
+import 'package:beacon/ui/screens/sub_screens/blood_screen.dart';
 import 'package:beacon/ui/screens/sub_screens/fire_screen.dart';
 import 'package:beacon/ui/screens/sub_screens/hospital_screen.dart';
 import 'package:beacon/ui/screens/sub_screens/pharmacy_screen.dart';
@@ -13,6 +14,7 @@ import 'package:beacon/ui/widgets/sos_progress_button.dart';
 import 'package:flutter/material.dart';
 import 'package:beacon/ui/widgets/custom_bottom_nav_bar.dart';
 import 'package:beacon/ui/widgets/screen_background.dart';
+import '';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -87,7 +89,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           imagePath: AssetsPath.ambulanceIcon,
                         ),
                         ServiceButton(
-                          onTap: () {},
+                          onTap: () {
+                            navigateTo(context, BloodBankScreen());
+                          },
                           title: "Blood Bank",
                           imagePath: AssetsPath.bloodIcon,
                         ),
@@ -171,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const BluMessenger()),
+        MaterialPageRoute(builder: (_) =>  BluMessenger()),
       ).then((_) => setState(() {}));
     }
   }
