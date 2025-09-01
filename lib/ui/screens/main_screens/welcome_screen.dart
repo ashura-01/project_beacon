@@ -1,8 +1,8 @@
-import 'package:beacon/ui/screens/main_screens/login_screen.dart';
-import 'package:beacon/ui/screens/main_screens/signup_screen.dart';
-import 'package:beacon/ui/utils/assets_path.dart';
-import 'package:beacon/ui/utils/page_switch.dart';
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
+import 'signup_screen.dart';
+import '../../utils/assets_path.dart';
+import '../../utils/page_switch.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -27,32 +27,14 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
-                Text(
+                const Text(
                   'WELCOME TO',
-                  style: TextStyle(
-                    color: const Color.fromARGB(255, 0, 12, 53),
-                    fontSize: 20,
-                    letterSpacing: 1.5,
-                  ),
+                  style: TextStyle(fontSize: 20, letterSpacing: 1.5),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                const Text(
                   'BEACON',
-                  style: TextStyle(
-                    color: const Color.fromARGB(255, 0, 12, 53),
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'YOUR SAFETY OUR DESIRE',
-                  style: TextStyle(
-                    color: const Color.fromARGB(255, 0, 12, 53),
-                    fontSize: 12,
-                    letterSpacing: 1.2,
-                  ),
+                  style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, letterSpacing: 2),
                 ),
                 const SizedBox(height: 40),
                 SizedBox(
@@ -65,39 +47,20 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    onPressed: () {
-                      navigateTo(context, LoginScreen());
-                    },
-                    child: const Text(
-                      'GET STARTED',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 1.2,
-                        fontSize: 16,
-                      ),
-                    ),
+                    onPressed: () => navigateTo(context, LoginScreen()),
+                    child: const Text('GET STARTED', style: TextStyle(fontSize: 16, color: Colors.white)),
                   ),
                 ),
                 const SizedBox(height: 20),
                 GestureDetector(
-                  onTap: () {
-                    navigateTo(context, SignUpScreen());
-                  },
-                  child: RichText(
-                    text: const TextSpan(
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 0, 12, 53),
-                        fontSize: 13,
-                      ),
+                  onTap: () => navigateTo(context, SignUpScreen()),
+                  child: const Text.rich(
+                    TextSpan(
+                      text: "DON'T HAVE AN ACCOUNT? ",
                       children: [
-                        TextSpan(text: "DON'T HAVE AN ACCOUNT? "),
                         TextSpan(
                           text: 'SIGN UP',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 0, 12, 53),
-                          ),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromARGB(255, 12, 0, 119)),
                         ),
                       ],
                     ),

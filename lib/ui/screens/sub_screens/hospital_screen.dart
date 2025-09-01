@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
-import 'package:flutter/services.dart'; // For clipboard
+import 'package:flutter/services.dart'; // Clipboard
 
 import '../main_screens/map_screen.dart';
 
@@ -17,6 +17,8 @@ class HospitalScreen extends StatefulWidget {
 
 class _HospitalScreenState extends State<HospitalScreen> {
   final String apiKey = MapApiKey.api_1;
+  final String placeDetailsApiKey = "2e4caa76774240b9aec613ece993d6bd";
+
   List<Map<String, dynamic>> _hospitals = [];
   bool _loading = true;
   Position? _currentPosition;
@@ -29,13 +31,13 @@ class _HospitalScreenState extends State<HospitalScreen> {
 
   Future<void> _fetchHospitals() async {
     try {
-      // Step 1: Get current location
+      // Get current location
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
       setState(() => _currentPosition = position);
 
-      // Step 2: Fetch nearby hospitals
+      // Fetch nearby hospitals
       final url =
           "https://api.geoapify.com/v2/places?categories=healthcare.hospital"
           "&filter=circle:${position.longitude},${position.latitude},5000"
@@ -56,22 +58,19 @@ class _HospitalScreenState extends State<HospitalScreen> {
           double distance =
               props["distance"] != null ? props["distance"].toDouble() : 0.0;
 
-          // --- Get phone reliably ---
           String phone = "N/A";
 
-          if (props["contact"] != null && props["contact"]["phone"] != null) {
-            phone = props["contact"]["phone"].toString();
-          } else if (props["datasource"] != null &&
-              props["datasource"]["raw"] != null) {
-            final raw = props["datasource"]["raw"];
-            if (raw["phone"] != null && raw["phone"].toString().isNotEmpty) {
-              phone = raw["phone"].toString();
-            } else if (raw["contactPhone"] != null &&
-                raw["contactPhone"].toString().isNotEmpty) {
-              phone = raw["contactPhone"].toString();
-            } else if (raw["mobile"] != null &&
-                raw["mobile"].toString().isNotEmpty) {
-              phone = raw["mobile"].toString();
+          // --- Use Place Details API to fetch phone number ---
+          final placeId = props["place_id"];
+          if (placeId != null) {
+            final detailUrl =
+                "https://api.geoapify.com/v2/place-details?place_id=$placeId&apiKey=$placeDetailsApiKey";
+            final detailResp = await http.get(Uri.parse(detailUrl));
+            if (detailResp.statusCode == 200) {
+              final detailData = jsonDecode(detailResp.body);
+              phone = detailData['properties']?['contact']?['phone'] ??
+                  detailData['properties']?['datasource']?['raw']?['phone'] ??
+                  "N/A";
             }
           }
 
