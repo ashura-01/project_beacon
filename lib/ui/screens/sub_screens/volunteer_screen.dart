@@ -21,48 +21,66 @@ class VolunteerScreen extends StatelessWidget {
         }
 
         if (controller.volunteers.isEmpty) {
-          return const Center(child: Text("No blood banks found"));
+          return RefreshIndicator(
+            onRefresh: () async {
+              controller.fetchVolunteers(); // reload manually
+              await Future.delayed(const Duration(seconds: 1));
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 200),
+                Center(child: Text("No blood banks found")),
+              ],
+            ),
+          );
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(10),
-          itemCount: controller.volunteers.length,
-          itemBuilder: (context, index) {
-            final volunteer = controller.volunteers[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      volunteer['name'] ?? "Unknown",
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Blood Group: ${volunteer['bloodGroup'] ?? '-'}",
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    Text(
-                      "Location: ${volunteer['location'] ?? '-'}",
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    Text(
-                      "Number: ${volunteer['phone'] ?? '-'}",
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                  ],
-                ),
-              ),
-            );
+        return RefreshIndicator(
+          onRefresh: () async {
+            controller.fetchVolunteers(); // reload manually
+            await Future.delayed(const Duration(seconds: 1));
           },
+          child: ListView.builder(
+            padding: const EdgeInsets.all(10),
+            itemCount: controller.volunteers.length,
+            itemBuilder: (context, index) {
+              final volunteer = controller.volunteers[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 3,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        volunteer['name'] ?? "Unknown",
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Blood Group: ${volunteer['bloodGroup'] ?? '-'}",
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      Text(
+                        "Location: ${volunteer['location'] ?? '-'}",
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      Text(
+                        "Number: ${volunteer['phone'] ?? '-'}",
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         );
       }),
     );

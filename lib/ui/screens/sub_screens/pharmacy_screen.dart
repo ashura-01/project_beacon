@@ -49,34 +49,38 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
 
         // 🔹 Step 3: Map pharmacy data
         setState(() {
-          _pharmacies = features.map((f) {
-            final props = f["properties"];
-            final geometry = f["geometry"]["coordinates"]; // [lon, lat]
-            double distance = props["distance"] != null
-                ? props["distance"].toDouble()
-                : 0.0;
+          _pharmacies =
+              features.map((f) {
+                final props = f["properties"];
+                final geometry = f["geometry"]["coordinates"]; // [lon, lat]
+                double distance =
+                    props["distance"] != null
+                        ? props["distance"].toDouble()
+                        : 0.0;
 
-            return {
-              "name": props["name"] ?? "Unnamed Pharmacy",
-              "address": props["formatted"] ?? "No address",
-              "distance": distance,
-              "lat": geometry[1],
-              "lon": geometry[0],
-            };
-          }).toList();
+                return {
+                  "name": props["name"] ?? "Unnamed Pharmacy",
+                  "address": props["formatted"] ?? "No address",
+                  "distance": distance,
+                  "lat": geometry[1],
+                  "lon": geometry[0],
+                };
+              }).toList();
           _loading = false;
         });
       } else {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error fetching pharmacies: ${response.statusCode}")),
+          SnackBar(
+            content: Text("Error fetching pharmacies: ${response.statusCode}"),
+          ),
         );
       }
     } catch (e) {
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error fetching pharmacies: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error fetching pharmacies: $e")));
     }
   }
 
@@ -95,47 +99,66 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
         title: const Text("Nearby Pharmacies"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
         foregroundColor: Colors.white,
-
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _pharmacies.isEmpty
-          ? const Center(child: Text("No pharmacies found nearby."))
-          : ListView.builder(
-        itemCount: _pharmacies.length,
-        itemBuilder: (context, index) {
-          final pharmacy = _pharmacies[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              leading: const Icon(Icons.local_pharmacy, color: Colors.green),
-              title: Text(
-                pharmacy["name"],
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(pharmacy["address"]),
-              trailing: Text(
-                _formatDistance(pharmacy["distance"]),
-                style: const TextStyle(color: Colors.blueGrey),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MapScreen(
-                      destination: LatLng(pharmacy["lat"], pharmacy["lon"]),
-                      destinationName: pharmacy["name"],
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
+      body: RefreshIndicator(
+        onRefresh: _fetchPharmacies, // Pull-to-refresh reload
+        child:
+            _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _pharmacies.isEmpty
+                ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 200),
+                    Center(child: Text("No pharmacies found nearby.")),
+                  ],
+                )
+                : ListView.builder(
+                  itemCount: _pharmacies.length,
+                  itemBuilder: (context, index) {
+                    final pharmacy = _pharmacies[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.local_pharmacy,
+                          color: Colors.green,
+                        ),
+                        title: Text(
+                          pharmacy["name"],
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(pharmacy["address"]),
+                        trailing: Text(
+                          _formatDistance(pharmacy["distance"]),
+                          style: const TextStyle(color: Colors.blueGrey),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => MapScreen(
+                                    destination: LatLng(
+                                      pharmacy["lat"],
+                                      pharmacy["lon"],
+                                    ),
+                                    destinationName: pharmacy["name"],
+                                  ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
       ),
     );
   }

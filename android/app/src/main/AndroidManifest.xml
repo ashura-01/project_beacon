@@ -43,7 +43,7 @@
 
     <application
         android:name="${applicationName}"
-        android:label="project_beacon"
+        android:label="projectBeacon"
         android:icon="@mipmap/ic_launcher">
 
         <activity

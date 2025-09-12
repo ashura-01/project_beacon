@@ -8,7 +8,7 @@ class SosController extends GetxController {
 
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
 
-  /// Get current location
+  /// Get current location of the user
   Future<Position?> getCurrentLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -37,15 +37,25 @@ class SosController extends GetxController {
     }
   }
 
-  /// Send SOS to other users in Firebase
+  /// Send SOS to other users via Firebase
   Future<void> sendSos() async {
     try {
+      // Get current user data
       final userData = await AuthController.instance.getUserData();
-      if (userData == null) return;
+      if (userData == null) {
+        Get.snackbar(
+          'Error',
+          'User data not found',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
 
+      // Get current location
       final position = await getCurrentLocation();
       if (position == null) return;
 
+      // Prepare SOS data
       final sosData = {
         "name": userData["name"] ?? "",
         "contact": userData["contact"] ?? "",
@@ -55,7 +65,7 @@ class SosController extends GetxController {
         "timestamp": DateTime.now().toIso8601String(),
       };
 
-      // Push to a common "sos_alerts" node in Firebase
+      // Push to Firebase under "sos_alerts"
       await _dbRef.child("sos_alerts").push().set(sosData);
 
       Get.snackbar(
@@ -68,6 +78,5 @@ class SosController extends GetxController {
           snackPosition: SnackPosition.BOTTOM);
     }
   }
-
-  Future<void> sendSosAlert() async {}
 }
+

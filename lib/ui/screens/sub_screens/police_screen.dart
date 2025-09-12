@@ -45,25 +45,30 @@ class _PoliceStationScreenState extends State<PoliceStationScreen> {
         final features = data["features"] as List;
 
         setState(() {
-          _policeStations = features.map((f) {
-            final props = f["properties"];
-            final geometry = f["geometry"]["coordinates"];
-            double distance = props["distance"]?.toDouble() ?? 0.0;
+          _policeStations =
+              features.map((f) {
+                final props = f["properties"];
+                final geometry = f["geometry"]["coordinates"];
+                double distance = props["distance"]?.toDouble() ?? 0.0;
 
-            return {
-              "name": props["name"] ?? "Unnamed Police Station",
-              "address": props["formatted"] ?? "No address",
-              "distance": distance,
-              "lat": geometry[1],
-              "lon": geometry[0],
-            };
-          }).toList();
+                return {
+                  "name": props["name"] ?? "Unnamed Police Station",
+                  "address": props["formatted"] ?? "No address",
+                  "distance": distance,
+                  "lat": geometry[1],
+                  "lon": geometry[0],
+                };
+              }).toList();
           _loading = false;
         });
       } else {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error fetching police stations: ${response.statusCode}")),
+          SnackBar(
+            content: Text(
+              "Error fetching police stations: ${response.statusCode}",
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -86,47 +91,66 @@ class _PoliceStationScreenState extends State<PoliceStationScreen> {
         title: const Text("Nearby Police Stations"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
         foregroundColor: Colors.white,
-
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _policeStations.isEmpty
-          ? const Center(child: Text("No police stations found nearby."))
-          : ListView.builder(
-        itemCount: _policeStations.length,
-        itemBuilder: (context, index) {
-          final station = _policeStations[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              leading: const Icon(Icons.local_police, color: Colors.blue),
-              title: Text(
-                station["name"],
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(station["address"]),
-              trailing: Text(
-                _formatDistance(station["distance"]),
-                style: const TextStyle(color: Colors.blueGrey),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MapScreen(
-                      destination: LatLng(station["lat"], station["lon"]),
-                      destinationName: station["name"],
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
+      body: RefreshIndicator(
+        onRefresh: _fetchPoliceStations, // Pull-to-refresh callback
+        child:
+            _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _policeStations.isEmpty
+                ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 200),
+                    Center(child: Text("No police stations found nearby.")),
+                  ],
+                )
+                : ListView.builder(
+                  itemCount: _policeStations.length,
+                  itemBuilder: (context, index) {
+                    final station = _policeStations[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.local_police,
+                          color: Colors.blue,
+                        ),
+                        title: Text(
+                          station["name"],
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(station["address"]),
+                        trailing: Text(
+                          _formatDistance(station["distance"]),
+                          style: const TextStyle(color: Colors.blueGrey),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => MapScreen(
+                                    destination: LatLng(
+                                      station["lat"],
+                                      station["lon"],
+                                    ),
+                                    destinationName: station["name"],
+                                  ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
       ),
     );
   }

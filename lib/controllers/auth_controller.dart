@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AuthController extends GetxController {
@@ -107,12 +108,15 @@ class AuthController extends GetxController {
     } on FirebaseAuthException catch (e) {
       Get.snackbar(
         "Auth Error",
-        e.message ?? "Invalid credentials",
+        "Invalid credentials",
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white
       );
+      print(e);
       return false; // failed
     } catch (e) {
-      Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM,backgroundColor: Colors.red, colorText: Colors.white);
       return false; // failed
     }
   }
@@ -210,4 +214,5 @@ class AuthController extends GetxController {
       Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM);
     }
   }
+  
 }

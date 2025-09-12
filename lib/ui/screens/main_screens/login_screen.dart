@@ -52,8 +52,21 @@ class LoginScreen extends StatelessWidget {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 6),
                     ),
-                    
+
                     onPressed: () async {
+                      if (emailController.text.trim().isEmpty ||
+                          passwordController.text.trim().isEmpty) {
+                        // Show error
+                        Get.snackbar(
+                          "Error",
+                          "Fields are empty",
+                          backgroundColor: Colors.redAccent,
+                          colorText: Colors.white,
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                        return; // stop execution
+                      }
+
                       bool success = await authController.login(
                         emailController.text.trim(),
                         passwordController.text.trim(),

@@ -131,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 strokeWidth: 8,
                 color: const Color.fromARGB(255, 0, 12, 53),
                 onComplete: () async {
-                  await SosController.instance.sendSosAlert();
+                  await SosController.instance.sendSos();
                 },
               ),
             ),

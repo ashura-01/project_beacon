@@ -8,17 +8,22 @@ Widget buildTextField(
 }) {
   final isEmail = label.toLowerCase().contains('email');
   final isPassword = label.toLowerCase().contains('password');
+  final isNumber = label.toLowerCase().contains('contact') ||
+      label.toLowerCase().contains('emergency');
 
   return TextField(
     controller: controller,
     obscureText: obscureText,
-    keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
+    keyboardType: isEmail
+        ? TextInputType.emailAddress
+        : isNumber
+            ? TextInputType.phone // numeric keyboard
+            : TextInputType.text,
     autocorrect: !isEmail && !isPassword,
     enableSuggestions: !isEmail && !isPassword,
-    textCapitalization:
-        isEmail || isPassword
-            ? TextCapitalization.none
-            : TextCapitalization.sentences,
+    textCapitalization: isEmail || isPassword
+        ? TextCapitalization.none
+        : TextCapitalization.sentences,
     decoration: InputDecoration(
       labelText: label,
       hintText: hintText,

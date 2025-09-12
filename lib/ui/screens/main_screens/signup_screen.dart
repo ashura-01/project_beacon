@@ -39,6 +39,11 @@ class SignUpScreen extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                 ),
+                SizedBox(height: 20,),
+                const Text(
+                  "User Information",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+                ),
                 const SizedBox(height: 20),
                 buildTextField(nameController, "NAME"),
                 const SizedBox(height: 16),
@@ -46,6 +51,14 @@ class SignUpScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 buildTextField(contactController, "CONTACT"), // Personal
                 const SizedBox(height: 20),
+                buildTextField(emailController, "EMAIL"),
+                const SizedBox(height: 16),
+                buildTextField(
+                  passwordController,
+                  "PASSWORD",
+                  obscureText: true,
+                ),
+                const SizedBox(height: 30),
 
                 const Text(
                   "Emergency Contacts (3)",
@@ -59,14 +72,35 @@ class SignUpScreen extends StatelessWidget {
                 buildTextField(emergency3Controller, "Emergency Contact 3"),
                 const SizedBox(height: 16),
 
-                buildTextField(emailController, "EMAIL"),
-                const SizedBox(height: 16),
-                buildTextField(passwordController, "PASSWORD", obscureText: true),
-                const SizedBox(height: 30),
-
                 ElevatedButton(
                   onPressed: () async {
-                    // Collect emergency contacts as a list
+                    // Collect all controllers in a list for validation
+                    final controllers = [
+                      nameController,
+                      addressController,
+                      contactController,
+                      emergency1Controller,
+                      emergency2Controller,
+                      emergency3Controller,
+                      emailController,
+                      passwordController,
+                    ];
+
+                    // Check if any field is empty
+                    for (var controller in controllers) {
+                      if (controller.text.trim().isEmpty) {
+                        Get.snackbar(
+                          "Error",
+                          "All fields are required",
+                          backgroundColor: Colors.redAccent,
+                          colorText: Colors.white,
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                        return; // Stop execution if any field is empty
+                      }
+                    }
+
+                    // Collect emergency contacts
                     final emergencyContacts = [
                       emergency1Controller.text.trim(),
                       emergency2Controller.text.trim(),
@@ -88,6 +122,11 @@ class SignUpScreen extends StatelessWidget {
                     navigateAndClearStack(context, const LoginScreen());
                   },
                   child: const Text("SIGN UP"),
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+                    foregroundColor: Colors.white,
+                  ),
                 ),
               ],
             ),

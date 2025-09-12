@@ -48,34 +48,38 @@ class _AmbulanceScreenState extends State<AmbulanceScreen> {
 
         // 🔹 Step 3: Map ambulance data
         setState(() {
-          _ambulances = features.map((f) {
-            final props = f["properties"];
-            final geometry = f["geometry"]["coordinates"]; // [lon, lat]
-            double distance = props["distance"] != null
-                ? props["distance"].toDouble()
-                : 0.0;
+          _ambulances =
+              features.map((f) {
+                final props = f["properties"];
+                final geometry = f["geometry"]["coordinates"]; // [lon, lat]
+                double distance =
+                    props["distance"] != null
+                        ? props["distance"].toDouble()
+                        : 0.0;
 
-            return {
-              "name": props["name"] ?? "Unnamed Ambulance Station",
-              "address": props["formatted"] ?? "No address",
-              "distance": distance, // meters
-              "lat": geometry[1],   // latitude
-              "lon": geometry[0],   // longitude
-            };
-          }).toList();
+                return {
+                  "name": props["name"] ?? "Unnamed Ambulance Station",
+                  "address": props["formatted"] ?? "No address",
+                  "distance": distance, // meters
+                  "lat": geometry[1], // latitude
+                  "lon": geometry[0], // longitude
+                };
+              }).toList();
           _loading = false;
         });
       } else {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error fetching ambulances: ${response.statusCode}")),
+          SnackBar(
+            content: Text("Error fetching ambulances: ${response.statusCode}"),
+          ),
         );
       }
     } catch (e) {
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error fetching ambulances: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error fetching ambulances: $e")));
     }
   }
 
@@ -95,45 +99,65 @@ class _AmbulanceScreenState extends State<AmbulanceScreen> {
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
         foregroundColor: Colors.white,
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _ambulances.isEmpty
-          ? const Center(child: Text("No ambulance stations found nearby."))
-          : ListView.builder(
-        itemCount: _ambulances.length,
-        itemBuilder: (context, index) {
-          final ambulance = _ambulances[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              leading: const Icon(Icons.local_hospital, color: Colors.orange),
-              title: Text(
-                ambulance["name"],
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(ambulance["address"]),
-              trailing: Text(
-                _formatDistance(ambulance["distance"]),
-                style: const TextStyle(color: Colors.blueGrey),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MapScreen(
-                      destination: LatLng(ambulance["lat"], ambulance["lon"]),
-                      destinationName: ambulance["name"],
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
+      body: RefreshIndicator(
+        onRefresh: _fetchAmbulances, // Pull-to-refresh reload
+        child:
+            _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _ambulances.isEmpty
+                ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 200),
+                    Center(child: Text("No ambulance stations found nearby.")),
+                  ],
+                )
+                : ListView.builder(
+                  itemCount: _ambulances.length,
+                  itemBuilder: (context, index) {
+                    final ambulance = _ambulances[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.local_hospital,
+                          color: Colors.orange,
+                        ),
+                        title: Text(
+                          ambulance["name"],
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(ambulance["address"]),
+                        trailing: Text(
+                          _formatDistance(ambulance["distance"]),
+                          style: const TextStyle(color: Colors.blueGrey),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => MapScreen(
+                                    destination: LatLng(
+                                      ambulance["lat"],
+                                      ambulance["lon"],
+                                    ),
+                                    destinationName: ambulance["name"],
+                                  ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
       ),
     );
   }

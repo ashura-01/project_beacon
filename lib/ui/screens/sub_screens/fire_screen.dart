@@ -15,7 +15,7 @@ class FireServiceScreen extends StatefulWidget {
 }
 
 class _FireServiceScreenState extends State<FireServiceScreen> {
-   final String apiKey = MapApiKey.api_1;
+  final String apiKey = MapApiKey.api_1;
   List<dynamic> _fireStations = [];
   bool _loading = true;
   Position? _currentPosition;
@@ -45,25 +45,30 @@ class _FireServiceScreenState extends State<FireServiceScreen> {
         final features = data["features"] as List;
 
         setState(() {
-          _fireStations = features.map((f) {
-            final props = f["properties"];
-            final geometry = f["geometry"]["coordinates"];
-            double distance = props["distance"]?.toDouble() ?? 0.0;
+          _fireStations =
+              features.map((f) {
+                final props = f["properties"];
+                final geometry = f["geometry"]["coordinates"];
+                double distance = props["distance"]?.toDouble() ?? 0.0;
 
-            return {
-              "name": props["name"] ?? "Unnamed Fire Station",
-              "address": props["formatted"] ?? "No address",
-              "distance": distance,
-              "lat": geometry[1],
-              "lon": geometry[0],
-            };
-          }).toList();
+                return {
+                  "name": props["name"] ?? "Unnamed Fire Station",
+                  "address": props["formatted"] ?? "No address",
+                  "distance": distance,
+                  "lat": geometry[1],
+                  "lon": geometry[0],
+                };
+              }).toList();
           _loading = false;
         });
       } else {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error fetching fire stations: ${response.statusCode}")),
+          SnackBar(
+            content: Text(
+              "Error fetching fire stations: ${response.statusCode}",
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -86,47 +91,66 @@ class _FireServiceScreenState extends State<FireServiceScreen> {
         title: const Text("Nearby Fire Stations"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
         foregroundColor: Colors.white,
-
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _fireStations.isEmpty
-          ? const Center(child: Text("No fire stations found nearby."))
-          : ListView.builder(
-        itemCount: _fireStations.length,
-        itemBuilder: (context, index) {
-          final station = _fireStations[index];
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              leading: const Icon(Icons.local_fire_department, color: Colors.red),
-              title: Text(
-                station["name"],
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(station["address"]),
-              trailing: Text(
-                _formatDistance(station["distance"]),
-                style: const TextStyle(color: Colors.blueGrey),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MapScreen(
-                      destination: LatLng(station["lat"], station["lon"]),
-                      destinationName: station["name"],
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
+      body: RefreshIndicator(
+        onRefresh: _fetchFireStations, // Pull-to-refresh callback
+        child:
+            _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _fireStations.isEmpty
+                ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 200),
+                    Center(child: Text("No fire stations found nearby.")),
+                  ],
+                )
+                : ListView.builder(
+                  itemCount: _fireStations.length,
+                  itemBuilder: (context, index) {
+                    final station = _fireStations[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.local_fire_department,
+                          color: Colors.red,
+                        ),
+                        title: Text(
+                          station["name"],
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(station["address"]),
+                        trailing: Text(
+                          _formatDistance(station["distance"]),
+                          style: const TextStyle(color: Colors.blueGrey),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => MapScreen(
+                                    destination: LatLng(
+                                      station["lat"],
+                                      station["lon"],
+                                    ),
+                                    destinationName: station["name"],
+                                  ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
       ),
     );
   }

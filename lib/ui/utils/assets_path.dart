@@ -7,6 +7,7 @@ class AssetsPath {
   static final fireIcon = '$_imagePath/fire.png';
   static final bloodIcon = '$_imagePath/blood.png';
   static final ambulanceIcon = '$_imagePath/ambulance.png';
+  static final appIcon="$_imagePath/app_icon.png";
 
 
 
