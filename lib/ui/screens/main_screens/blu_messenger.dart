@@ -45,7 +45,6 @@ class _BluMessengerState extends State<BluMessenger> {
     ].request();
   }
 
-  /// Start advertising
   Future<void> startAdvertising() async {
     await _requestPermissions();
     try {
@@ -73,13 +72,11 @@ class _BluMessengerState extends State<BluMessenger> {
     }
   }
 
-  /// Stop advertising
   Future<void> stopAdvertising() async {
     await Nearby().stopAdvertising();
     setState(() => isAdvertising = false);
   }
 
-  /// Start discovery
   Future<void> startDiscovery() async {
     await _requestPermissions();
     discoveredDevices.clear();
@@ -106,13 +103,11 @@ class _BluMessengerState extends State<BluMessenger> {
     }
   }
 
-  /// Stop discovery
   Future<void> stopDiscovery() async {
     await Nearby().stopDiscovery();
     setState(() => isDiscovering = false);
   }
 
-  /// Connection callback
   void _onConnectionInit(String id, ConnectionInfo info) {
     setState(() => connectedDeviceName = info.endpointName);
 
@@ -130,7 +125,6 @@ class _BluMessengerState extends State<BluMessenger> {
     );
   }
 
-  /// Request connection to selected device
   Future<void> connectToDevice(Endpoint device) async {
     try {
       await Nearby().requestConnection(
@@ -168,6 +162,50 @@ class _BluMessengerState extends State<BluMessenger> {
     }
   }
 
+  void _showDeviceSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.black,
+          title: const Text(
+            "Select a Device",
+            style: TextStyle(color: Colors.white),
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: discoveredDevices.length,
+              itemBuilder: (context, index) {
+                final device = discoveredDevices[index];
+                return ListTile(
+                  title: Text(
+                    device.name,
+                    style: const TextStyle(color: Colors.green),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    connectToDevice(device);
+                  },
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                "Cancel",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -182,6 +220,8 @@ class _BluMessengerState extends State<BluMessenger> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Blu Messenger"),
+        backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: Icon(isAdvertising ? Icons.stop : Icons.campaign),
@@ -198,7 +238,6 @@ class _BluMessengerState extends State<BluMessenger> {
       ),
       body: Column(
         children: [
-          // Connected info
           if (connectedDeviceName != null)
             Container(
               width: double.infinity,
@@ -212,26 +251,21 @@ class _BluMessengerState extends State<BluMessenger> {
                 ),
               ),
             ),
-          // Device selection
           if (connectedId == null && discoveredDevices.isNotEmpty)
-            Container(
-              height: 80,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: discoveredDevices.length,
-                itemBuilder: (context, index) {
-                  final device = discoveredDevices[index];
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                      onPressed: () => connectToDevice(device),
-                      child: Text(device.name),
-                    ),
-                  );
-                },
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(200, 50),
+                  ),
+                  onPressed: _showDeviceSelectionDialog,
+                  child: const Text("Select Device"),
+                ),
               ),
             ),
-          // Chat messages
           Expanded(
             child: ListView.builder(
               itemCount: messages.length,
@@ -260,7 +294,6 @@ class _BluMessengerState extends State<BluMessenger> {
               },
             ),
           ),
-          // Input
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -290,7 +323,6 @@ class _BluMessengerState extends State<BluMessenger> {
   }
 }
 
-/// Helper class for discovered device
 class Endpoint {
   final String id;
   final String name;
