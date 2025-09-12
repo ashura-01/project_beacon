@@ -1,6 +1,7 @@
 import 'package:beacon/ui/screens/main_screens/map_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 
 class VictimScreen extends StatefulWidget {
@@ -56,6 +57,17 @@ class _VictimScreenState extends State<VictimScreen> {
     }
   }
 
+  // Copy a number to clipboard and show Snackbar
+  void _copyNumber(String number) {
+    Clipboard.setData(ClipboardData(text: number));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Copied: $number"),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,77 +77,146 @@ class _VictimScreenState extends State<VictimScreen> {
         foregroundColor: Colors.white,
       ),
       body: RefreshIndicator(
-        onRefresh: _reloadAlerts, // Pull-to-refresh action
-        child: alerts.isEmpty
-            ? ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 200),
-                  Center(child: Text("No SOS alerts yet")),
-                ],
-              )
-            : ListView.builder(
-                itemCount: alerts.length,
-                itemBuilder: (context, index) {
-                  final alert = alerts[index];
+        onRefresh: _reloadAlerts,
+        child:
+            alerts.isEmpty
+                ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 200),
+                    Center(child: Text("No SOS alerts yet")),
+                  ],
+                )
+                : ListView.builder(
+                  itemCount: alerts.length,
+                  itemBuilder: (context, index) {
+                    final alert = alerts[index];
 
-                  final name = alert['name'] ?? "Unknown";
-                  final contact = alert['contact'] ?? "Unknown";
-                  final emergencyContacts = List<String>.from(
-                    alert['emergencyContacts'] ?? <String>[],
-                  );
-                  final latitude = alert['latitude'] ?? 0.0;
-                  final longitude = alert['longitude'] ?? 0.0;
-                  final timestamp = alert['timestamp'] ?? "";
+                    final name = alert['name'] ?? "Unknown";
+                    final contact = alert['contact'] ?? "Unknown";
+                    final emergencyContacts = List<String>.from(
+                      alert['emergencyContacts'] ?? <String>[],
+                    );
+                    final latitude = alert['latitude'] ?? 0.0;
+                    final longitude = alert['longitude'] ?? 0.0;
+                    final timestamp = alert['timestamp'] ?? "";
 
-                  return Card(
-                    margin: const EdgeInsets.all(8),
-                    child: ListTile(
-                      title: Text("$name ($contact)"),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Emergency Contacts: ${emergencyContacts.join(', ')}",
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on, color: Colors.red),
-                              const SizedBox(width: 4),
-                              const Text("View Location"),
-                              const Spacer(),
-                              IconButton(
-                                icon: const Icon(Icons.map, color: Colors.blue),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => MapScreen(
-                                        destination: LatLng(latitude, longitude),
-                                        destinationName: name,
-                                      ),
+                    return Card(
+                      margin: const EdgeInsets.all(8),
+                      child: ListTile(
+                        title: Row(
+                          children: [
+                            Expanded(child: Text("$name ($contact)")),
+                            IconButton(
+                              icon: const Icon(Icons.copy, size: 20),
+                              onPressed: () => _copyNumber(contact),
+                              tooltip: "Copy contact number",
+                            ),
+                          ],
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+                            if (emergencyContacts.isNotEmpty)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 4),
+                                  if (emergencyContacts.isNotEmpty)
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text("Contacts of relative or friends:"),
+                                        const SizedBox(height: 4),
+                                        Wrap(
+                                          spacing: 12,
+                                          runSpacing: 4,
+                                          children:
+                                              emergencyContacts.map((num) {
+                                                return ElevatedButton.icon(
+                                                  onPressed:
+                                                      () => _copyNumber(num),
+                                                  icon: const Icon(
+                                                    Icons.copy,
+                                                    size: 16,
+                                                    color: Color.fromARGB(255, 0, 0, 0),
+                                                  ),
+                                                  label: Text(num),
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        const Color.fromARGB(255, 146, 221, 202),
+                                                    foregroundColor:
+                                                        const Color.fromARGB(255, 0, 0, 0),
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 8,
+                                                          vertical: 4,
+                                                        ),
+                                                    minimumSize: const Size(
+                                                      0,
+                                                      0,
+                                                    ),
+                                                    tapTargetSize:
+                                                        MaterialTapTargetSize
+                                                            .shrinkWrap,
+                                                  ),
+                                                );
+                                              }).toList(),
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                },
+                                ],
                               ),
-                            ],
-                          ),
-                        ],
+
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.location_on,
+                                  color: Colors.red,
+                                ),
+                                const SizedBox(width: 4),
+                                const Text("View Location"),
+                                const Spacer(),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.map,
+                                    color: Colors.blue,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (_) => MapScreen(
+                                              destination: LatLng(
+                                                latitude,
+                                                longitude,
+                                              ),
+                                              destinationName: name,
+                                            ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        trailing: Text(
+                          timestamp.isNotEmpty
+                              ? DateTime.parse(
+                                timestamp,
+                              ).toLocal().toString().substring(0, 19)
+                              : "",
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ),
-                      trailing: Text(
-                        timestamp.isNotEmpty
-                            ? DateTime.parse(timestamp)
-                                .toLocal()
-                                .toString()
-                                .substring(0, 19)
-                            : "",
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
       ),
     );
   }
