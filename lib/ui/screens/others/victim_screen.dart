@@ -106,7 +106,7 @@ class _VictimScreenState extends State<VictimScreen> {
                       child: ListTile(
                         title: Row(
                           children: [
-                            Expanded(child: Text("$name ($contact)")),
+                            Expanded(child: Text("$name ($contact)",style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),)),
                             IconButton(
                               icon: const Icon(Icons.copy, size: 20),
                               onPressed: () => _copyNumber(contact),
@@ -176,11 +176,12 @@ class _VictimScreenState extends State<VictimScreen> {
                                 
                                 const SizedBox(width: 4),
                                 const Text("View Location"),
-                                const Spacer(),
+                                // const Spacer(),
                                 IconButton(
                                   icon: const Icon(
-                                    Icons.location_history,
-                                    color: Colors.blue,
+                                    Icons.location_on,
+                                    color: Color.fromARGB(255, 24, 0, 112),
+                                    size: 28,
                                   ),
                                   onPressed: () {
                                     Navigator.push(
