@@ -173,16 +173,13 @@ class _VictimScreenState extends State<VictimScreen> {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                const Icon(
-                                  Icons.location_on,
-                                  color: Colors.red,
-                                ),
+                                
                                 const SizedBox(width: 4),
                                 const Text("View Location"),
                                 const Spacer(),
                                 IconButton(
                                   icon: const Icon(
-                                    Icons.map,
+                                    Icons.location_history,
                                     color: Colors.blue,
                                   ),
                                   onPressed: () {
