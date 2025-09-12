@@ -1,5 +1,5 @@
 import 'package:beacon/ui/screens/main_screens/home_screen.dart';
-import 'package:beacon/ui/screens/main_screens/welcome_screen.dart';
+import 'package:beacon/ui/screens/others/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; // <-- import GetX
 
@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: isLoggedIn ? const HomeScreen() : const WelcomeScreen(),
+      home: isLoggedIn ? const HomeScreen() : const SplashScreen(),
     );
   }
 }
