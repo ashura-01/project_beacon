@@ -38,7 +38,11 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 buildTextField(emailController, "EMAIL"),
                 const SizedBox(height: 20),
-                buildTextField(passwordController, "PASSWORD", obscureText: true),
+                buildTextField(
+                  passwordController,
+                  "PASSWORD",
+                  obscureText: true,
+                ),
                 const SizedBox(height: 30),
                 SizedBox(
                   width: 200,
@@ -48,13 +52,17 @@ class LoginScreen extends StatelessWidget {
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 6),
                     ),
+                    
                     onPressed: () async {
-                      await authController.login(
+                      bool success = await authController.login(
                         emailController.text.trim(),
                         passwordController.text.trim(),
                       );
-                      navigateAndClearStack(context, const HomeScreen());
+                      if (success) {
+                        navigateAndClearStack(context, const HomeScreen());
+                      }
                     },
+
                     child: const Text("LOG IN"),
                   ),
                 ),

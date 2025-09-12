@@ -1,3 +1,4 @@
+import 'package:beacon/controllers/sos_controller.dart';
 import 'package:beacon/ui/screens/main_screens/blu_messenger.dart';
 import 'package:beacon/ui/screens/main_screens/map_screen.dart';
 import 'package:beacon/ui/screens/sub_screens/ambulance_screen.dart';
@@ -53,18 +54,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-
       drawer: CustomDrawer(),
-
 
       body: Stack(
         children: [
           ScreenBackground(
             child: Column(
               children: [
-                const SizedBox(
-                  height: kToolbarHeight + 80,
-                ),
+                const SizedBox(height: kToolbarHeight + 80),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -133,8 +130,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 size: 160,
                 strokeWidth: 8,
                 color: const Color.fromARGB(255, 0, 12, 53),
-                onComplete: () {
-                  print('Button fully pressed!');
+                onComplete: () async {
+                  await SosController.instance.sendSosAlert();
                 },
               ),
             ),
@@ -174,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) =>  BluMessenger()),
+        MaterialPageRoute(builder: (_) => BluMessenger()),
       ).then((_) => setState(() {}));
     }
   }

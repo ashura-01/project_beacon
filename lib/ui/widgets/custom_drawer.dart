@@ -3,6 +3,7 @@ import 'package:beacon/ui/screens/main_screens/login_screen.dart';
 import 'package:beacon/ui/screens/others/about_us.dart';
 import 'package:beacon/ui/screens/others/my_account.dart';
 import 'package:beacon/ui/screens/others/settings.dart';
+import 'package:beacon/ui/screens/others/victim_screen.dart';
 import 'package:beacon/ui/screens/sub_screens/blood_screen.dart';
 import 'package:beacon/ui/utils/page_switch.dart';
 import 'package:flutter/material.dart';
@@ -52,12 +53,20 @@ class CustomDrawer extends StatelessWidget {
                     navigateTo(context, SettingsScreen());
                   },
                 ),
-                 ListTile(
+                ListTile(
                   leading: const Icon(Icons.volunteer_activism),
                   title: const Text('Join Volunteer'),
                   onTap: () {
                     Navigator.pop(context);
                     navigateTo(context, BloodBankScreen());
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.health_and_safety_rounded),
+                  title: const Text('Victim'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    navigateTo(context, VictimScreen());
                   },
                 ),
                 ListTile(
@@ -68,7 +77,6 @@ class CustomDrawer extends StatelessWidget {
                     navigateTo(context, AboutUsScreen());
                   },
                 ),
-                
               ],
             ),
           ),
@@ -78,8 +86,8 @@ class CustomDrawer extends StatelessWidget {
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text('Logout', style: TextStyle(color: Colors.red)),
             onTap: () async {
-              await AuthController.instance.logout(); 
-              Get.offAll(() => LoginScreen()); 
+              await AuthController.instance.logout();
+              Get.offAll(() => LoginScreen());
             },
           ),
         ],

@@ -13,7 +13,10 @@ class SignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final nameController = TextEditingController();
     final addressController = TextEditingController();
-    final contactController = TextEditingController();
+    final contactController = TextEditingController(); // Personal contact
+    final emergency1Controller = TextEditingController();
+    final emergency2Controller = TextEditingController();
+    final emergency3Controller = TextEditingController();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
 
@@ -30,21 +33,47 @@ class SignUpScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(AssetsPath.logo, height: 200, fit: BoxFit.cover),
+                  child: Image.asset(
+                    AssetsPath.logo,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 buildTextField(nameController, "NAME"),
                 const SizedBox(height: 16),
                 buildTextField(addressController, "ADDRESS"),
                 const SizedBox(height: 16),
-                buildTextField(contactController, "CONTACT"),
+                buildTextField(contactController, "CONTACT"), // Personal
+                const SizedBox(height: 20),
+
+                const Text(
+                  "Emergency Contacts (3)",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 12),
+                buildTextField(emergency1Controller, "Emergency Contact 1"),
                 const SizedBox(height: 16),
+                buildTextField(emergency2Controller, "Emergency Contact 2"),
+                const SizedBox(height: 16),
+                buildTextField(emergency3Controller, "Emergency Contact 3"),
+                const SizedBox(height: 16),
+
                 buildTextField(emailController, "EMAIL"),
                 const SizedBox(height: 16),
                 buildTextField(passwordController, "PASSWORD", obscureText: true),
                 const SizedBox(height: 30),
+
                 ElevatedButton(
                   onPressed: () async {
+                    // Collect emergency contacts as a list
+                    final emergencyContacts = [
+                      emergency1Controller.text.trim(),
+                      emergency2Controller.text.trim(),
+                      emergency3Controller.text.trim(),
+                    ];
+
+                    // Register user
                     await authController.register(
                       emailController.text.trim(),
                       passwordController.text.trim(),
@@ -52,8 +81,10 @@ class SignUpScreen extends StatelessWidget {
                         "name": nameController.text.trim(),
                         "address": addressController.text.trim(),
                         "contact": contactController.text.trim(),
+                        "emergencyContacts": emergencyContacts,
                       },
                     );
+
                     navigateAndClearStack(context, const LoginScreen());
                   },
                   child: const Text("SIGN UP"),
