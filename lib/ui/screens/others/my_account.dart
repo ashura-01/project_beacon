@@ -1,4 +1,5 @@
 import 'package:beacon/controllers/auth_controller.dart';
+import 'package:beacon/ui/screens/main_screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,7 +15,6 @@ class MyAccountScreen extends StatelessWidget {
         title: const Text("My Account"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
         foregroundColor: Colors.white,
-
       ),
       body: SafeArea(
         child: FutureBuilder<Map<String, dynamic>?>(
@@ -40,7 +40,10 @@ class MyAccountScreen extends StatelessWidget {
                       backgroundColor: Colors.blueGrey,
                       child: Text(
                         (userData["name"] ?? "U")[0].toUpperCase(),
-                        style: const TextStyle(fontSize: 40, color: Colors.white),
+                        style: const TextStyle(
+                          fontSize: 40,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -69,13 +72,20 @@ class MyAccountScreen extends StatelessWidget {
                   Center(
                     child: ElevatedButton.icon(
                       onPressed: () async {
-                        await authController.logout();
+                        await AuthController.instance.logout();
+                        Get.offAll(() => LoginScreen());
                       },
-                      icon: const Icon(Icons.logout,color: Colors.white,),
-                      label: const Text("Logout",style: TextStyle(color: Colors.white),),
+                      icon: const Icon(Icons.logout, color: Colors.white),
+                      label: const Text(
+                        "Logout",
+                        style: TextStyle(color: Colors.white),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 15,
+                        ),
                       ),
                     ),
                   ),
