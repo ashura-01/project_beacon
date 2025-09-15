@@ -91,6 +91,8 @@ class _FireServiceScreenState extends State<FireServiceScreen> {
         title: const Text("Nearby Fire Stations"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
         foregroundColor: Colors.white,
+        centerTitle: true,
+
       ),
       body: RefreshIndicator(
         onRefresh: _fetchFireStations, // Pull-to-refresh callback

@@ -91,7 +91,8 @@ class _HospitalScreenState extends State<HospitalScreen> {
       return "${meters.toStringAsFixed(0)} m";
     }
   }
-
+ 
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,6 +100,8 @@ class _HospitalScreenState extends State<HospitalScreen> {
         title: const Text("Nearby Hospitals"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
         foregroundColor: Colors.white,
+        centerTitle: true,
+
       ),
       body: RefreshIndicator(
         onRefresh: _fetchHospitals, // Pull-to-refresh reloads hospitals

@@ -62,6 +62,7 @@ class VolunteerScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Blood Bank Details"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+        centerTitle: true,
         foregroundColor: Colors.white,
       ),
       body: Obx(() {
@@ -128,7 +129,7 @@ class VolunteerScreen extends StatelessWidget {
                           IconButton(
                             icon: const Icon(
                               Icons.location_on,
-                              color: Colors.red,
+                              color: Color.fromARGB(255, 15, 0, 68),
                             ),
                             onPressed: () {
                               final location = volunteer['location'] ?? '';

@@ -9,6 +9,7 @@ class AboutUsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("About Us"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+        foregroundColor: Colors.white,
         centerTitle: true,
       ),
       body: Center(

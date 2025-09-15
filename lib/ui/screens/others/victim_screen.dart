@@ -89,6 +89,7 @@ class _VictimScreenState extends State<VictimScreen> {
         title: const Text("Victim Alerts"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
         foregroundColor: Colors.white,
+        centerTitle: true,
       ),
       body: RefreshIndicator(
         onRefresh: _reloadAlerts,

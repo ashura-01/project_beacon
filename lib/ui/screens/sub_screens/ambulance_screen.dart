@@ -98,6 +98,7 @@ class _AmbulanceScreenState extends State<AmbulanceScreen> {
         title: const Text("Nearby Ambulance Stations"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
         foregroundColor: Colors.white,
+        centerTitle: true,
       ),
       body: RefreshIndicator(
         onRefresh: _fetchAmbulances, // Pull-to-refresh reload

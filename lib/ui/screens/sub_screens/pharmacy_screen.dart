@@ -28,13 +28,13 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
 
   Future<void> _fetchPharmacies() async {
     try {
-      // 🔹 Step 1: Get current location
+     
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
       setState(() => _currentPosition = position);
 
-      // 🔹 Step 2: Fetch nearby pharmacies from Geoapify
+     
       final url =
           "https://api.geoapify.com/v2/places?categories=healthcare.pharmacy"
           "&filter=circle:${position.longitude},${position.latitude},5000"
@@ -47,12 +47,12 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
         final data = jsonDecode(response.body);
         final features = data["features"] as List;
 
-        // 🔹 Step 3: Map pharmacy data
+        
         setState(() {
           _pharmacies =
               features.map((f) {
                 final props = f["properties"];
-                final geometry = f["geometry"]["coordinates"]; // [lon, lat]
+                final geometry = f["geometry"]["coordinates"]; 
                 double distance =
                     props["distance"] != null
                         ? props["distance"].toDouble()
@@ -98,10 +98,11 @@ class _PharmacyScreenState extends State<PharmacyScreen> {
       appBar: AppBar(
         title: const Text("Nearby Pharmacies"),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+        centerTitle: true,
         foregroundColor: Colors.white,
       ),
       body: RefreshIndicator(
-        onRefresh: _fetchPharmacies, // Pull-to-refresh reload
+        onRefresh: _fetchPharmacies, 
         child:
             _loading
                 ? const Center(child: CircularProgressIndicator())

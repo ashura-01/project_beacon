@@ -210,6 +210,8 @@ class SettingsScreen extends StatelessWidget {
                       }
                     },
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 0, 12, 53),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 30,
                         vertical: 15,
