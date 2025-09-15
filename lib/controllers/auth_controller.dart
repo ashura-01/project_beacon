@@ -111,12 +111,18 @@ class AuthController extends GetxController {
         "Invalid credentials",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
-        colorText: Colors.white
+        colorText: Colors.white,
       );
       print(e);
       return false; // failed
     } catch (e) {
-      Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM,backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        "Error",
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return false; // failed
     }
   }
@@ -156,11 +162,11 @@ class AuthController extends GetxController {
   Future<void> updateName(String uid, String newName) async {
     try {
       await _dbRef.child("users").child(uid).update({"name": newName});
-      Get.snackbar(
-        "Success",
-        "Name updated successfully",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Get.snackbar(
+      //   "Success",
+      //   "Name updated successfully",
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
     } catch (e) {
       Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM);
     }
@@ -169,20 +175,20 @@ class AuthController extends GetxController {
   /// UPDATE PERSONAL CONTACT
   Future<void> updatePersonalContact(String uid, String contact) async {
     if (contact.trim().isEmpty) {
-      Get.snackbar(
-        "Error",
-        "Contact cannot be empty",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Get.snackbar(
+      //   "Error",
+      //   "Contact cannot be empty",
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
       return;
     }
     try {
       await _dbRef.child("users").child(uid).update({"contact": contact});
-      Get.snackbar(
-        "Success",
-        "Personal contact updated successfully",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Get.snackbar(
+      //   "Success",
+      //   "Personal contact updated successfully",
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
     } catch (e) {
       Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM);
     }
@@ -194,22 +200,22 @@ class AuthController extends GetxController {
     List<String> contacts,
   ) async {
     if (contacts.length != 3 || contacts.any((c) => c.trim().isEmpty)) {
-      Get.snackbar(
-        "Error",
-        "Please provide 3 valid emergency contacts",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Get.snackbar(
+      //   "Error",
+      //   "Please provide 3 valid emergency contacts",
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
       return;
     }
     try {
       await _dbRef.child("users").child(uid).update({
         "emergencyContacts": contacts,
       });
-      Get.snackbar(
-        "Success",
-        "Emergency contacts updated successfully",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Get.snackbar(
+      //   "Success",
+      //   "Emergency contacts updated successfully",
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
     } catch (e) {
       Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM);
     }
@@ -217,5 +223,45 @@ class AuthController extends GetxController {
 
   String get currentUserId => firebaseUser.value!.uid;
 
-  
+  /// UPDATE LOCATION newlu add kora hoise
+  Future<void> updateLocation(String uid, String location) async {
+    if (location.trim().isEmpty) {
+      // Get.snackbar(
+      //   "Error",
+      //   "Location cannot be empty",
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
+      return;
+    }
+    try {
+      await _dbRef.child("users").child(uid).update({"location": location});
+      // Get.snackbar(
+      //   "Success",
+      //   "Location updated successfully",
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
+    } catch (e) {
+      Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
+  // --- Reactive user data for MyAccountScreen ---
+  Rxn<Map<String, dynamic>> reactiveUserData = Rxn<Map<String, dynamic>>();
+
+  // --- Fetch / refresh user data for UI ---
+  Future<void> refreshUserData() async {
+    try {
+      final user = firebaseUser.value;
+      if (user != null) {
+        final snapshot = await _dbRef.child("users").child(user.uid).get();
+        if (snapshot.exists && snapshot.value != null) {
+          reactiveUserData.value = Map<String, dynamic>.from(
+            snapshot.value as Map,
+          );
+        }
+      }
+    } catch (e) {
+      Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM);
+    }
+  }
 }
