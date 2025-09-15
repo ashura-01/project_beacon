@@ -214,5 +214,8 @@ class AuthController extends GetxController {
       Get.snackbar("Error", e.toString(), snackPosition: SnackPosition.BOTTOM);
     }
   }
+
+  String get currentUserId => firebaseUser.value!.uid;
+
   
 }

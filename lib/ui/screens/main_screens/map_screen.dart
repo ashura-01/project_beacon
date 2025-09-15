@@ -18,8 +18,7 @@ class MapScreen extends StatefulWidget {
   State<MapScreen> createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen>
-    with TickerProviderStateMixin {
+class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
   late final AnimatedMapController _mapController;
   LatLng _currentCenter = LatLng(23.8103, 90.4125); // Default Dhaka
   LatLng? _myLocation;
@@ -118,21 +117,21 @@ class _MapScreenState extends State<MapScreen>
     if (res.statusCode == 200) {
       final data = json.decode(res.body);
       final coords =
-      data["features"][0]["geometry"]["coordinates"][0] as List<dynamic>;
+          data["features"][0]["geometry"]["coordinates"][0] as List<dynamic>;
       final props = data["features"][0]["properties"];
 
       final points =
-      coords.map((c) => LatLng(c[1].toDouble(), c[0].toDouble())).toList();
+          coords.map((c) => LatLng(c[1].toDouble(), c[0].toDouble())).toList();
 
       setState(() {
         _routePoints = points;
         _routeSummary =
-        "${(props["time"] / 60).toStringAsFixed(0)} mins • ${(props["distance"] / 1000).toStringAsFixed(1)} km";
+            "${(props["time"] / 60).toStringAsFixed(0)} mins • ${(props["distance"] / 1000).toStringAsFixed(1)} km";
       });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to fetch route")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Failed to fetch route")));
     }
     setState(() => _loadingRoute = false);
   }
@@ -165,17 +164,19 @@ class _MapScreenState extends State<MapScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: widget.destinationName != null
-            ? Text("Route to ${widget.destinationName}")
-            : TextField(
-          controller: _searchController,
-          decoration: const InputDecoration(
-            
-            hintText: "Search location...",
-            border: InputBorder.none,
-          ),
-          onChanged: _getSuggestionsDebounced,
-        ),
+        title:
+            widget.destinationName != null
+                ? Text("Route to ${widget.destinationName}")
+                : TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    hintText: "Search location...",
+                    border: InputBorder.none,
+                    
+                  ),
+                  style: TextStyle(color: Colors.white),
+                  onChanged: _getSuggestionsDebounced,
+                ),
         backgroundColor: const Color.fromARGB(255, 0, 12, 53),
         foregroundColor: Colors.white,
       ),
@@ -186,13 +187,14 @@ class _MapScreenState extends State<MapScreen>
             options: MapOptions(
               initialCenter: _currentCenter,
               initialZoom: 13,
-              interactionOptions:
-              const InteractionOptions(flags: InteractiveFlag.all),
+              interactionOptions: const InteractionOptions(
+                flags: InteractiveFlag.all,
+              ),
             ),
             children: [
               TileLayer(
                 urlTemplate:
-                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                 subdomains: const ['a', 'b', 'c'],
               ),
               if (_myLocation != null)
@@ -202,9 +204,12 @@ class _MapScreenState extends State<MapScreen>
                       point: _myLocation!,
                       width: 40,
                       height: 40,
-                      child: const Icon(Icons.my_location,
-                          color: Colors.blue, size: 30),
-                    )
+                      child: const Icon(
+                        Icons.my_location,
+                        color: Colors.blue,
+                        size: 30,
+                      ),
+                    ),
                   ],
                 ),
               if (_destination != null)
@@ -214,9 +219,12 @@ class _MapScreenState extends State<MapScreen>
                       point: _destination!,
                       width: 40,
                       height: 40,
-                      child: const Icon(Icons.location_on,
-                          color: Colors.red, size: 35),
-                    )
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 35,
+                      ),
+                    ),
                   ],
                 ),
               if (_routePoints.isNotEmpty)
@@ -233,8 +241,7 @@ class _MapScreenState extends State<MapScreen>
           ),
 
           // Loader
-          if (_loadingRoute)
-            const Center(child: CircularProgressIndicator()),
+          if (_loadingRoute) const Center(child: CircularProgressIndicator()),
 
           // Suggestions dropdown
           if (_suggestions.isNotEmpty && widget.destination == null)
@@ -244,7 +251,8 @@ class _MapScreenState extends State<MapScreen>
               right: 15,
               child: Card(
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: _suggestions.length,
@@ -270,18 +278,24 @@ class _MapScreenState extends State<MapScreen>
                 color: Colors.white,
                 elevation: 6,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Row(
                     children: [
-                      const Icon(Icons.directions_car,
-                          color: Colors.blue, size: 28),
+                      const Icon(
+                        Icons.directions_car,
+                        color: Colors.blue,
+                        size: 28,
+                      ),
                       const SizedBox(width: 10),
                       Text(
                         _routeSummary!,
                         style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -301,8 +315,9 @@ class _MapScreenState extends State<MapScreen>
             child: const Icon(Icons.add),
             onPressed: () {
               _mapController.mapController.move(
-                  _mapController.mapController.camera.center,
-                  _mapController.mapController.camera.zoom + 1);
+                _mapController.mapController.camera.center,
+                _mapController.mapController.camera.zoom + 1,
+              );
             },
           ),
           const SizedBox(height: 8),
@@ -312,8 +327,9 @@ class _MapScreenState extends State<MapScreen>
             child: const Icon(Icons.remove),
             onPressed: () {
               _mapController.mapController.move(
-                  _mapController.mapController.camera.center,
-                  _mapController.mapController.camera.zoom - 1);
+                _mapController.mapController.camera.center,
+                _mapController.mapController.camera.zoom - 1,
+              );
             },
           ),
           const SizedBox(height: 8),
