@@ -1,5 +1,6 @@
 import 'package:beacon/controllers/volunteer_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class VolunteerScreen extends StatelessWidget {
@@ -60,7 +61,9 @@ class VolunteerScreen extends StatelessWidget {
                       Text(
                         volunteer['name'] ?? "Unknown",
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -71,9 +74,33 @@ class VolunteerScreen extends StatelessWidget {
                         "Location: ${volunteer['location'] ?? '-'}",
                         style: const TextStyle(fontSize: 14),
                       ),
-                      Text(
-                        "Number: ${volunteer['phone'] ?? '-'}",
-                        style: const TextStyle(fontSize: 14),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero, 
+                          minimumSize: const Size(
+                            0,
+                            0,
+                          ), 
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () {
+                          final phone = volunteer['phone'] ?? '';
+                          if (phone.isNotEmpty) {
+                            Clipboard.setData(ClipboardData(text: phone));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Phone number copied'),
+                              ),
+                            );
+                          }
+                        },
+                        child: Text(
+                          "Number: ${volunteer['phone'] ?? '-'}",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.blue,
+                          ),
+                        ),
                       ),
                     ],
                   ),
